@@ -1,0 +1,154 @@
+# ==============================================================================
+# Git Ignore Configuration for Merkuriy-R Decoupled Fullstack Project
+# Structure:
+#   ├── MerkuriyRfirma/ (Django 5 + DRF Backend)
+#   └── frontend/       (React + Vite + Tailwind Frontend)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environment Variables & Secrets (CRITICAL FOR SECURITY)
+# ------------------------------------------------------------------------------
+.env
+.env.local
+.env.development.local
+.env.test.local
+*.env
+
+# Preserve example blueprints for deployment reference
+!.env.example
+!*/.env.example
+!frontend/.env.example
+!frontend/.env.production
+!MerkuriyRfirma/.env.example
+
+# Google Service Account credentials & private API keys
+google_service_account*.json
+*service_account*.json
+*credentials*.json
+*.pem
+*.key
+*.cert
+
+# ------------------------------------------------------------------------------
+# 2. Python & Django Backend (MerkuriyRfirma/)
+# ------------------------------------------------------------------------------
+# Bytecode and cache
+__pycache__/
+*/__pycache__/
+*/**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+*/venv/
+*/.venv/
+
+# Django Database (keep local DB out of repository)
+*.sqlite3
+db.sqlite3
+*/db.sqlite3
+
+# Django static files collected by WhiteNoise/collectstatic
+staticfiles/
+*/staticfiles/
+MerkuriyRfirma/staticfiles/
+
+# User uploaded media assets in development (optional, keep directory structure)
+# MerkuriyRfirma/media/*
+# !MerkuriyRfirma/media/.gitkeep
+
+# Pytest, coverage and unit tests cache
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Distribution / packaging
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ------------------------------------------------------------------------------
+# 3. Node.js & React Frontend (frontend/)
+# ------------------------------------------------------------------------------
+# Dependencies
+node_modules/
+*/node_modules/
+frontend/node_modules/
+
+# Production build outputs (Netlify builds this automatically)
+dist/
+*/dist/
+dist-ssr/
+frontend/dist/
+
+# Vite and bundler caches
+.vite/
+*/.vite/
+.eslintcache
+.parcel-cache
+
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ------------------------------------------------------------------------------
+# 4. Operating System & Editor Artifacts
+# ------------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# IDE / Code Editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+*.bak
+
+# Temporary / Log files
+*.log
+logs/
+*.tmp
+*.temp

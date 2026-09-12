@@ -1,0 +1,137 @@
+================================================================================
+          MERKURIY-R XUSUSIY QURILISH FIRMASI — ARIZALAR VA EMAIL TIZIMI
+================================================================================
+Ushbu qo'llanmada vebsayt orqali foydalanuvchilar (mijozlar) yuborgan arizalar
+qanday qilib kompaniya elektron pochtasiga (email) borishi va uni kod ichidan
+hamda .env sozlamalari orqali qanday o'zgartirish mumkinligi to'liq tushuntirilgan.
+================================================================================
+
+
+1. ARIZALARNING ISHLASH MEXANIZMI VA ARXITEKTURASI
+--------------------------------------------------------------------------------
+Vebsaytda mijozlar quyidagi joylarda buyurtma/aloqa formasini to'ldirishlari mumkin:
+  a) Bosh sahifadagi (HomePage) tezkor bepul smeta hisoblash formasi.
+  b) Har bir loyihaning ichidagi (ProjectDetailPage) "Shu kabi loyihani hisoblatish" formasi.
+  c) Sayt yuqorisidagi "Ariza qoldirish" tugmasi bosilganda ochiluvchi LeadModal oynasi.
+  d) Merkuriy-App sahifasidagi obuna / kutish ro'yxati formasi.
+
+Zanjir qanday ishlaydi:
+  1. Frontend (React) forma maydonlarini (ism, telefon raqami, xizmat turi) tekshiradi
+     va Axios orqali quyidagi manzilga POST so'rov yuboradi:
+     --> POST http://127.0.0.1:8000/api/leads/create/
+
+  2. Django Backend (apps/leads/views.py -> LeadCreateView):
+     - Ma'lumotlarni tekshiradi va SQLite bazasiga ("Lead" modeliga) saqlaydi.
+     - Mijozni tarmoq kutishlarisiz kutdirmaslik uchun DARHOL 201 Created javobini qaytaradi.
+     - Shu paytning o'zida fonda (background) Python'ning "ThreadPoolExecutor"
+       tizimi orqali 2 ta vazifani parallel ishga tushiradi:
+         * send_lead_email(lead.id) -> Kompaniya emailiga xat jo'natadi.
+         * sync_lead_to_sheets(lead.id) -> Google Sheets jadvaliga yangi qator qo'shadi.
+
+
+2. EMAIL XATI QAYERDAN VA QANDAY JO'NATILADI?
+--------------------------------------------------------------------------------
+Asosiy email jo'natuvchi funksiya quyidagi faylda joylashgan:
+  📁 Fayl: apps/leads/services.py
+  📌 Funksiya: send_lead_email(lead_id)
+
+Ushbu funksiya quyidagi bosqichlarni bajaradi:
+  1. Bazadan lead_id bo'yicha mijoz ma'lumotlarini oladi (Ism, Telefon, Qiziqqan loyiha).
+  2. Xat mavzusini belgilaydi:
+     subject = "[Merkuriy-R] Yangi mijoz arizasi"
+  3. Xatning matnli (plain_message) va chiroyli korporativ HTML dizaynini (html_message) tuzadi.
+  4. Django'ning standart "send_mail(...)" funksiyasi orqali xatni jo'natadi.
+
+
+3. EMAIL SOZLAMALARINI KOD ICHIDAN VA .ENV ORQALI O'ZGARTIRISH
+--------------------------------------------------------------------------------
+
+A) QABUL QILUVCHI EMAILLARNI O'ZGARTIRISH:
+   Xat qaysi email manziliga borishini belgilash uchun .env faylidagi
+   NOTIFY_EMAIL_RECIPIENTS parametrini tahrirlang:
+
+   📁 Fayl: MerkuriyRfirma/.env
+   ------------------------------------------------------------------------------
+   NOTIFY_EMAIL_RECIPIENTS=direktor@merkuriy-r.uz,menejer@merkuriy-r.uz
+   ------------------------------------------------------------------------------
+   (Bir nechta manzil bo'lsa, vergul bilan ajratib yoziladi).
+
+   Agar kod ichidan standart qiymatni o'zgartirmoqchi bo'lsangiz:
+   📁 Fayl: config/settings.py
+   Satr ~130:
+   NOTIFY_EMAIL_RECIPIENTS = config('NOTIFY_EMAIL_RECIPIENTS', default='info@merkuriy-r.uz', cast=Csv())
+
+
+B) XAT MAVZUSI (SUBJECT)NI O'ZGARTIRISH:
+   Agar xat mavzusini o'zgartirmoqchi bo'lsangiz:
+   📁 Fayl: apps/leads/services.py
+   Satr ~28:
+   ------------------------------------------------------------------------------
+   subject = "[Merkuriy-R] Yangi mijoz arizasi"
+   ------------------------------------------------------------------------------
+   Buni xohlagan matnga o'zgartirishingiz mumkin, masalan:
+   subject = f"Yangi buyurtma: {lead.name} ({lead.project_type})"
+
+
+C) XAT DIZAYNI VA MATNINI (HTML/TEXT) O'ZGARTIRISH:
+   📁 Fayl: apps/leads/services.py
+   Funksiya: send_lead_email(lead_id)
+   
+   - Oddiy matn ko'rinishi:
+     `plain_message` o'zgaruvchisi ichidagi matnni o'zgartiring.
+   
+   - Chiroyli HTML xat ko'rinishi:
+     `html_message` o'zgaruvchisi ichidagi HTML/CSS kodlarini o'zgartiring.
+     Ranglar, logotip, korporativ ranglar (masalan, #1e3a8a - ko'k, #F59E0B - oltin)
+     hamda jadval ustunlarini shu yerdan moslashtirishingiz mumkin.
+
+
+D) HAQIQIY POCHTA SERVERINI (GMAIL / YANDEX / MAIL.RU) ULASH:
+   Hozirgi vaqtda mahalliy ishlab chiqish (development) rejimida xatlar konsolga
+   (terminalga) chiqariladi, ya'ni xat haqiqatda qanday ko'rinishda borishi terminalda
+   ko'rinadi va hech qanday SMTP xatoligi yuz bermaydi.
+
+   Haqiqiy Gmail yoki korporativ pochta orqali jo'natish uchun `.env` faylida
+   quyidagilarni to'ldiring:
+
+   📁 Fayl: MerkuriyRfirma/.env
+   ------------------------------------------------------------------------------
+   # 1. Console o'rniga SMTP backendni yoqing:
+   EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+
+   # 2. Gmail SMTP sozlamalari:
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_USE_TLS=True
+
+   # 3. Sizning pochtangiz va parolingiz:
+   EMAIL_HOST_USER=sizning_pochta@gmail.com
+   # Diqqat: Gmail uchun oddiy parol emas, Google Account -> Security -> App Passwords
+   # bo'limidan 16 xonali "Ilova paroli" olinadi:
+   EMAIL_HOST_PASSWORD=abcd efgh ijkl mnop
+
+   # 4. Yuboruvchi nomi:
+   DEFAULT_FROM_EMAIL=Merkuriy-R Xususiy qurilish firmasi <noreply@merkuriy-r.uz>
+
+   # 5. Ariza xati kelishi kerak bo'lgan manzil:
+   NOTIFY_EMAIL_RECIPIENTS=sizning_ishchi_pochta@gmail.com
+   ------------------------------------------------------------------------------
+
+
+4. QANDAY TEST QILISH MUMKIN?
+--------------------------------------------------------------------------------
+1. Django serverni yoqing:
+   python manage.py runserver
+
+2. Frontendni yoqing:
+   npm run dev
+
+3. Saytga kirib (http://localhost:3000), forma orqali ism va telefon yozib yuboring.
+4. Django terminalida darhol yangi xatning chiroyli HTML va matn ko'rinishi chiqadi:
+   Subject: [Merkuriy-R] Yangi mijoz arizasi
+   From: Merkuriy-R Xususiy qurilish firmasi <noreply@merkuriy-r.uz>
+   To: info@merkuriy-r.uz
+   ...
+5. Agar .env da haqiqiy Gmail SMTP ko'rsatilgan bo'lsa, xat soniyalar ichida
+   haqiqiy pochtangizga yetib boradi!
+================================================================================
