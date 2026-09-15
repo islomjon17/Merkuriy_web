@@ -32,6 +32,7 @@ def send_lead_email(lead_id: int):
         from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@merkuriy-r.uz')
 
         created_str = lead.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        project_display = lead.project_type if lead.project_type else "Ko'rsatilmagan"
 
         # Plain text content
         plain_message = (
@@ -39,7 +40,7 @@ def send_lead_email(lead_id: int):
             f"Merkuriy-R vebsaytidan yangi mijoz arizasi kelib tushdi:\n\n"
             f"- Mijoz ismi: {lead.name}\n"
             f"- Telefon raqami: {lead.phone_number}\n"
-            f"- Qiziqayotgan xizmat/loyiha: {lead.project_type or 'Ko\'rsatilmagan'}\n"
+            f"- Qiziqayotgan xizmat/loyiha: {project_display}\n"
             f"- Kelib tushgan vaqti: {created_str}\n"
             f"- Holati: {lead.get_status_display()}\n\n"
             f"Iltimos, mijoz bilan imkon qadar tezroq bog'laning.\n"
@@ -83,7 +84,7 @@ def send_lead_email(lead_id: int):
                         </tr>
                         <tr>
                             <td class="label">Xizmat / Loyiha turi:</td>
-                            <td>{lead.project_type or "Ko'rsatilmagan"}</td>
+                            <td>{project_display}</td>
                         </tr>
                         <tr>
                             <td class="label">Kelib tushgan vaqti:</td>
