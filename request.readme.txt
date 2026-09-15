@@ -135,3 +135,4 @@ D) HAQIQIY POCHTA SERVERINI (GMAIL / YANDEX / MAIL.RU) ULASH:
 5. Agar .env da haqiqiy Gmail SMTP ko'rsatilgan bo'lsa, xat soniyalar ichida
    haqiqiy pochtangizga yetib boradi!
 ================================================================================
+## app passwrods 

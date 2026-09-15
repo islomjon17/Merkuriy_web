@@ -138,18 +138,22 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 CORS_ALLOW_CREDENTIALS = True
 
 # Email SMTP Settings for Lead Notifications
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+# EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Merkuriy-R Xususiy qurilish firmasi <noreply@merkuriy-r.uz>')
-NOTIFY_EMAIL_RECIPIENTS = config(
-    'NOTIFY_EMAIL_RECIPIENTS',
-    default='info@merkuriy-r.uz',
-    cast=Csv()
-)
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='mtmp smwv eida brns ')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
+NOTIFY_EMAIL_RECIPIENTS = config('NOTIFY_EMAIL_RECIPIENTS', default='turgunovislomjon107@gmail.com', cast=Csv())
+#send email back end
+INSTALLED_APPS += ['anymail']
+
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+ANYMAIL = {
+    "RESEND_API_KEY": config("RESEND_API_KEY", default=""),
+}
+
 
 # Google Sheets Configuration
 GOOGLE_SERVICE_ACCOUNT_FILE = config('GOOGLE_SERVICE_ACCOUNT_FILE', default='google_service_account.json')
