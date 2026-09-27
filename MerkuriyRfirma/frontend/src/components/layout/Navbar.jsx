@@ -4,20 +4,26 @@ import { Phone, Menu, X, ArrowUpRight, Sparkles, Sun, Moon } from 'lucide-react'
 import { getContact } from '../../api/client';
 import { useTheme } from '../../context/ThemeContext';
 
-export default function Navbar({ onOpenLeadModal }) {
-  const [contactInfo, setContactInfo] = useState(null);
+export default function Navbar({ onOpenLeadModal, contact }) {
+  const [contactInfo, setContactInfo] = useState(contact || null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
+    if (contact) {
+      setContactInfo(contact);
+      return;
+    }
     getContact()
       .then((data) => setContactInfo(data))
       .catch(() => {
         setContactInfo({ primary_phone: '+998 71 200 44 55' });
       });
+  }, [contact]);
 
+  useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };

@@ -3,10 +3,14 @@ import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Clock, Send, Instagram, Facebook, Youtube, ShieldCheck } from 'lucide-react';
 import { getContact } from '../../api/client';
 
-export default function Footer() {
-  const [contactInfo, setContactInfo] = useState(null);
+export default function Footer({ contact }) {
+  const [contactInfo, setContactInfo] = useState(contact || null);
 
   useEffect(() => {
+    if (contact) {
+      setContactInfo(contact);
+      return;
+    }
     getContact()
       .then((data) => setContactInfo(data))
       .catch(() => {
@@ -19,7 +23,7 @@ export default function Footer() {
           working_hours: 'Dushanba - Shanba: 09:00 - 19:00',
         });
       });
-  }, []);
+  }, [contact]);
 
   const primaryPhone = contactInfo?.primary_phone || '+998 71 200 44 55';
   const secondaryPhone = contactInfo?.secondary_phone || '+998 90 999 88 77';
