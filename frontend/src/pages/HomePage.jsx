@@ -227,7 +227,7 @@ export default function HomePage({ onOpenLeadModal, showToast }) {
       </section>
 
       {/* 6. Testimonials */}
-      <Testimonials testimonials={testimonials} />
+      {/* <Testimonials testimonials={testimonials} /> */}
     </div>
   );
 }
