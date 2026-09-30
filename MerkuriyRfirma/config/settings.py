@@ -129,9 +129,19 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='https://*.netlify.app,http://localhost:3000,http://127.0.0.1:3000',
+    default=(
+        'https://merkuriy-r.uz,'
+        'https://www.merkuriy-r.uz,'
+        'https://merkuriy-r.netlify.app,'
+        'http://localhost:3000,'
+        'http://127.0.0.1:3000,'
+        'http://localhost:5173,'
+        'http://127.0.0.1:5173'
+    ),
     cast=Csv()
 )
+
+# Netlify'ning barcha preview va branch domenlari uchun regex:
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https:\/\/.*\.netlify\.app$",
 ]
